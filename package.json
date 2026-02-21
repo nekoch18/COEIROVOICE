@@ -1,0 +1,35 @@
+{
+  "name": "coeirovoice",
+  "version": "1.1.2",
+  "description": "COEIROVOICE",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "build": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "net.nekoch18.coeirovoice",
+    "productName": "COEIROVOICE",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "portable",
+      "icon": "corirovoice-logo.ico"
+    }
+  },
+  "keywords": [],
+  "author": "nekoch18",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.13.5",
+    "play-sound": "^1.1.6"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.24",
+    "electron": "^40.3.0",
+    "electron-builder": "^26.7.0",
+    "postcss": "^8.5.6"
+  }
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            background: #1f1f1f;
+            color: #fff;
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+
+        /* タイトルバーのデザイン（メイン画面と統一） */
+        .title-bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            /* 右側にボタンを寄せる */
+            -webkit-app-region: drag;
+        }
+
+        .close-btn {
+            width: 35px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: #888;
+            cursor: pointer;
+            -webkit-app-region: no-drag;
+            font-size: 18px;
+        }
+
+        .close-btn:hover {
+            background: #e81123;
+            color: #fff;
+        }
+
+        /* コンテンツエリア */
+        .about-content {
+            text-align: center;
+            padding: 30px 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="title-bar">
+        <button id="closeAboutBtn" class="close-btn">×</button>
+    </div>
+
+    <div class="about-content">
+        <h2 style="color:#10b981; margin:0;">COEIROVOICE</h2>
+        <img src="corirovoice-logo.png" alt="COEIROVOICE Logo" style="width:100px; margin-top:20px;">
+        <p style="font-size:12px; color:#888;">Version <span id="version"></span></p>
+        <p style="padding:15px; font-size:14px;">使用API：COEIROINK</p>
+        <hr style="width:100px; border:0; border-top:1px solid #333; margin: 20px auto;">
+        <p style="font-size:11px; color:#666;">© 2026 COEIROVOICE Project</p>
+    </div>
+
+    <script src="about.js"></script>
+    <script>
+        (async () => {
+            try {
+                const version = await window.api?.getVersion?.();
+                document.getElementById("version").textContent = version ?? "unknown";
+            } catch {
+                document.getElementById("version").textContent = "unknown";
+            }
+        })();
+    </script>
+</body>
+
+</html>

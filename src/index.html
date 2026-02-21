@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>COEIROVOICE Console</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            border: 1px solid #333;
+            box-sizing: border-box;
+        }
+
+        /* タイトルバー */
+        .title-bar {
+            height: 38px;
+            background: #1f1f1f;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            -webkit-app-region: drag;
+            border-bottom: 1px solid #333;
+        }
+
+        .nav-group {
+            -webkit-app-region: no-drag;
+            display: flex;
+            gap: 8px;
+        }
+
+        .app-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #fff;
+            margin-right: 10px;
+        }
+
+        .btn-sm {
+            padding: 4px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        #launchBtn {
+            background: #d97706;
+            color: white;
+        }
+
+        #settingBtn,
+        #characterBtn,
+        #aboutBtn {
+            background: #333;
+            color: #ccc;
+        }
+
+        .btn-sm:hover {
+            background: #444;
+            color: #fff;
+        }
+
+        .win-controls {
+            margin-left: auto;
+            -webkit-app-region: no-drag;
+            display: flex;
+        }
+
+        .ctrl-btn {
+            width: 45px;
+            height: 38px;
+            border: none;
+            background: transparent;
+            color: #888;
+            cursor: pointer;
+        }
+
+        /* メインレイアウト（横並び） */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 15px;
+            overflow: hidden;
+        }
+
+        .workspace {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            min-height: 0;
+        }
+
+        /* 左：キャラクター */
+        .character-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 180px;
+            flex-shrink: 0;
+        }
+
+        .avatar-frame {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #ffffff;
+            border: 5px solid #b8b8b8;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+            border-radius: 100px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #currentSpeakerImg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .speaker-label {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #888;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .input-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        textarea {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        textarea:focus {
+            border-color: #10b981;
+        }
+
+        /* 下部 */
+        #status {
+            font-size: 12px;
+            color: #555;
+            text-align: right;
+            margin: 0;
+        }
+
+        #speakBtn {
+            height: 55px;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        /* モーダル */
+        #characterModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #1f1f1f;
+            width: 85%;
+            height: 80%;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #characterGrid {
+            flex: 1;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* アニメーション */
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .is-speaking .avatar-frame {
+            animation: bounce 0.4s infinite;
+            border-color: #10b981;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="title-bar">
+            <div class="nav-group">
+                <span class="app-title">COEIROVOICE</span>
+                <button class="btn-sm" id="launchBtn">ENGINE START</button>
+                <button class="btn-sm" id="settingBtn">SETTING</button>
+                <button class="btn-sm" id="characterBtn">CHARACTER</button>
+                <button class="btn-sm" id="aboutBtn">ABOUT</button>
+            </div>
+            <div class="win-controls">
+                <button class="ctrl-btn" id="pinBtn" style="font-size: 150%;">🖈</button>
+                <button class="ctrl-btn" id="minBtn">－</button>
+                <button class="ctrl-btn" id="closeBtn">×</button>
+            </div>
+        </div>
+        <div class="content">
+            <div class="workspace">
+                <div class="character-view" id="speakerWrapper">
+                    <div class="avatar-frame"><img id="currentSpeakerImg"></div>
+                    <span class="speaker-label" id="currentSpeakerName">Waiting for Engine...</span>
+                </div>
+                <div class="input-view">
+                    <textarea id="inputText" placeholder="文章を入力してください..."></textarea>
+                </div>
+            </div>
+            <p id="status">Standby</p>
+            <button id="speakBtn">VOICE GENERATE</button>
+        </div>
+    </div>
+    <div id="characterModal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="font-size:14px; margin:0;">SELECT CHARACTER</h2>
+                <button id="closeModal"
+                    style="background:none; border:none; color:#888; font-size:24px; cursor:pointer;">&times;</button>
+            </div>
+            <div id="characterGrid"></div>
+        </div>
+    </div>
+    <script src="renderer.js"></script>
+</body>
+
+</html>
