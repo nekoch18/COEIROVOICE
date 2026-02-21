@@ -14,7 +14,7 @@ CEIROINKのAPIを使って音声を出せる簡単なデスクトップアプリ
 3. 初回使用時にCOEIROINKの実行EXEファイルをしてください。
 4. COEIROVOICEの上のタブからCOEIROVOICE起動し、テキストを入力し、再生を行います。
 ## スクリーンショット
-![配布物](readme_materials\Screenshot_01.png)
+![配布物](readme_materials/Screenshot_01.png)
 ## ライセンスとクレジット
 
 ソフトウェア
