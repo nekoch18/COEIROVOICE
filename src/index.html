@@ -30,6 +30,7 @@
             background: #1f1f1f;
             display: flex;
             align-items: center;
+            gap: 10px;
             padding: 0 12px;
             -webkit-app-region: drag;
             border-bottom: 1px solid #333;
@@ -39,13 +40,15 @@
             -webkit-app-region: no-drag;
             display: flex;
             gap: 8px;
+            align-items: center;
+            min-width: 0;
         }
 
         .app-title {
             font-size: 11px;
             font-weight: bold;
             color: #fff;
-            margin-right: 10px;
+            letter-spacing: 0.2px;
         }
 
         .btn-sm {
@@ -75,10 +78,25 @@
             color: #fff;
         }
 
-        .win-controls {
-            margin-left: auto;
+        .window-controls,
+        .window-actions {
             -webkit-app-region: no-drag;
             display: flex;
+            align-items: center;
+        }
+
+        /* Windows/Linux: 右側にウィンドウ操作 */
+        .nav-group {
+            order: 0;
+        }
+
+        .window-actions {
+            order: 1;
+            margin-left: auto;
+        }
+
+        .window-controls {
+            order: 2;
         }
 
         .ctrl-btn {
@@ -88,6 +106,67 @@
             background: transparent;
             color: #888;
             cursor: pointer;
+        }
+
+        /* macOSっぽい並び/見た目（左に信号ボタン、右にピン） */
+        .platform-darwin .window-controls {
+            order: 0;
+            gap: 8px;
+        }
+
+        .platform-darwin .nav-group {
+            order: 1;
+            flex: 1;
+        }
+
+        .platform-darwin .window-actions {
+            order: 2;
+        }
+
+        .platform-darwin .window-controls .ctrl-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            padding: 0;
+            font-size: 0;
+            /* 記号はhover時に表示 */
+            line-height: 12px;
+        }
+
+        .platform-darwin #closeBtn {
+            order: 0;
+            background: #ff5f57;
+        }
+
+        .platform-darwin #minBtn {
+            order: 1;
+            background: #febc2e;
+        }
+
+        .platform-darwin #closeBtn::before,
+        .platform-darwin #minBtn::before {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            text-align: center;
+            font-size: 10px;
+            line-height: 12px;
+            color: rgba(0, 0, 0, 0.65);
+            opacity: 0;
+            transition: opacity 0.12s ease-in-out;
+        }
+
+        .platform-darwin #closeBtn::before {
+            content: "×";
+        }
+
+        .platform-darwin #minBtn::before {
+            content: "–";
+        }
+
+        .platform-darwin .window-controls:hover #closeBtn::before,
+        .platform-darwin .window-controls:hover #minBtn::before {
+            opacity: 1;
         }
 
         /* メインレイアウト（横並び） */
@@ -243,6 +322,10 @@
 <body>
     <div class="container">
         <div class="title-bar">
+            <div class="window-controls">
+                <button class="ctrl-btn" id="minBtn">－</button>
+                <button class="ctrl-btn" id="closeBtn">×</button>
+            </div>
             <div class="nav-group">
                 <span class="app-title">COEIROVOICE</span>
                 <button class="btn-sm" id="launchBtn">ENGINE START</button>
@@ -250,10 +333,11 @@
                 <button class="btn-sm" id="characterBtn">CHARACTER</button>
                 <button class="btn-sm" id="aboutBtn">ABOUT</button>
             </div>
-            <div class="win-controls">
-                <button class="ctrl-btn" id="pinBtn" style="font-size: 150%;">🖈</button>
-                <button class="ctrl-btn" id="minBtn">－</button>
-                <button class="ctrl-btn" id="closeBtn">×</button>
+            <div class="window-actions">
+                <button class="ctrl-btn" id="pinBtn" style="font-size: 150%;">
+                    <span class="platform-darwin" style="display: inline;">𖡡</span>
+                    <span class="platform-windows platform-linux" style="display: none;">🖈</span>
+                </button>
             </div>
         </div>
         <div class="content">
@@ -281,6 +365,11 @@
         </div>
     </div>
     <script src="renderer.js"></script>
+    <script>
+        const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+        document.querySelector('.platform-darwin').style.display = isMac ? 'inline' : 'none';
+        document.querySelector('.platform-windows').style.display = isMac ? 'none' : 'inline';
+    </script>
 </body>
 
 </html>

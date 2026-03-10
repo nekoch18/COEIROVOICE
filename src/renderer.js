@@ -4,6 +4,11 @@ const fs = require('fs');
 const { exec } = require('child_process');
 const path = require('path');
 
+// --- プラットフォーム判定（CSS切り替え用） ---
+try {
+    document.body.classList.add(`platform-${process.platform}`);
+} catch {}
+
 // --- 状態管理 ---
 let currentSpeakerUuid = "3c37646f-3881-5374-2a83-149267990abc";
 let currentStyleId = 0;

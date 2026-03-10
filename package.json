@@ -1,12 +1,13 @@
 {
   "name": "coeirovoice",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "COEIROVOICE",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "build": "electron-builder --win --x64"
+    "build": "electron-builder --win --x64",
+    "buildmac": "electron-builder --mac --universal"
   },
   "build": {
     "appId": "net.nekoch18.coeirovoice",
@@ -17,6 +18,10 @@
     "win": {
       "target": "portable",
       "icon": "corirovoice-logo.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "corirovoice-logo_mac.icns"
     }
   },
   "keywords": [],
@@ -29,7 +34,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.24",
     "electron": "^40.3.0",
-    "electron-builder": "^26.7.0",
+    "electron-builder": "^24.13.3",
     "postcss": "^8.5.6"
   }
 }

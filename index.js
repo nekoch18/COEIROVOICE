@@ -5,7 +5,20 @@ const path = require('path');
 
 let win;
 const CONFIG_PATH = path.join(app.getPath('userData'), 'config.json');
-let coeiroinkPath = fs.existsSync(CONFIG_PATH) ? JSON.parse(fs.readFileSync(CONFIG_PATH)).exePath : "";
+
+function loadEnginePath() {
+    if (!fs.existsSync(CONFIG_PATH)) return "";
+    try {
+        const raw = fs.readFileSync(CONFIG_PATH, 'utf8');
+        const cfg = JSON.parse(raw);
+        // 互換: 以前は exePath で保存していた
+        return cfg.enginePath || cfg.exePath || "";
+    } catch {
+        return "";
+    }
+}
+
+let coeiroinkPath = loadEnginePath();
 
 function createWindow() {
     win = new BrowserWindow({
@@ -21,25 +34,39 @@ function createWindow() {
 }
 
 ipcMain.on('select-exe', async (event) => {
-    const result = await dialog.showOpenDialog(win, { properties: ['openFile'], filters: [{ name: 'COEIROINK.exe', extensions: ['exe'] }] });
+    const isMac = process.platform === 'darwin';
+    const filters = isMac
+        ? [{ name: 'COEIROINK.app', extensions: ['app'] }]
+        : [{ name: 'COEIROINK.exe', extensions: ['exe'] }];
+
+    const result = await dialog.showOpenDialog(win, {
+        properties: isMac ? ['openFile', 'openDirectory'] : ['openFile'],
+        filters,
+    });
     if (!result.canceled) {
-        coeiroinkPath = result.filePaths[0];
-        fs.writeFileSync(CONFIG_PATH, JSON.stringify({ exePath: coeiroinkPath }));
+        const selectedPath = result.filePaths[0];
+        if (isMac && !selectedPath.toLowerCase().endsWith('.app')) {
+            event.reply('engine-error', 'mac版は COEIROINK.app を選択してください');
+            return;
+        }
+
+        coeiroinkPath = selectedPath;
+        fs.writeFileSync(CONFIG_PATH, JSON.stringify({ enginePath: coeiroinkPath }));
         event.reply('path-selected', coeiroinkPath);
     }
 });
 
 ipcMain.on('launch-engine', (event) => {
     if (!coeiroinkPath) {
-        event.reply('engine-error', '先にSETTINGからexeを指定してください');
+        event.reply('engine-error', '先にSETTINGから COEIROINK を指定してください');
         return;
     }
 
-    const child = spawn(`"${coeiroinkPath}"`, [], {
-        shell: true,
-        detached: true,
-        stdio: 'ignore'
-    });
+    const isMac = process.platform === 'darwin';
+
+    const child = isMac
+        ? spawn('open', [coeiroinkPath], { detached: true, stdio: 'ignore' })
+        : spawn(`"${coeiroinkPath}"`, [], { shell: true, detached: true, stdio: 'ignore' });
 
     child.unref();
 });
@@ -63,9 +90,15 @@ ipcMain.on('toggle-always-on-top', (event) => {
     event.reply('always-on-top-status', !isAlwaysOnTop);
 });
 
-ipcMain.on('window-close', () => app.quit());
+ipcMain.on('window-close', () => {
+    app.quit();
+});
 ipcMain.on('window-minimize', () => win.minimize());
 
 app.whenReady().then(createWindow);
 
 ipcMain.handle("get-version", () => app.getVersion());
+
+app.on('window-all-closed', () => {
+    app.quit();
+});
